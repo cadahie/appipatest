@@ -35,7 +35,7 @@ jobs:
           EOF
 
           npm install --no-audit --no-fund @capacitor/core @capacitor/cli @capacitor/ios
-          npx cap add ios --no-interactive
+          npx cap add ios
           npx cap sync ios
 
       - name: Build .app archive
