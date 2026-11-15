@@ -13,18 +13,34 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Init Capacitor & add iOS
         run: |
-          npm init -y
-          npm install @capacitor/core @capacitor/cli
-          npx cap init AppIpaTest com.example.appipatest --web-dir=www
-          npx cap add ios
+          set -e
+          cat << 'EOF' > package.json
+          {
+            "name": "appipatest",
+            "version": "1.0.0",
+            "private": true
+          }
+          EOF
+
+          cat << 'EOF' > capacitor.config.json
+          {
+            "appId": "com.example.appipatest",
+            "appName": "AppIpaTest",
+            "webDir": "www"
+          }
+          EOF
+
+          npm install --no-audit --no-fund @capacitor/core @capacitor/cli @capacitor/ios
+          npx cap add ios --no-interactive
           npx cap sync ios
 
       - name: Build .app archive
         run: |
+          set -e
           cd ios/App
           xcodebuild -workspace App.xcworkspace \
             -scheme App \
@@ -37,6 +53,7 @@ jobs:
 
       - name: Package .ipa
         run: |
+          set -e
           mkdir -p Payload
           cp -r ios/App/build/Build/Products/Release-iphoneos/App.app Payload/
           zip -r AppIpaTest.ipa Payload
