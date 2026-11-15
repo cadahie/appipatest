@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Thế Giới Mở 3D</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #87CEEB;
+            touch-action: none;
+            font-family: Arial, sans-serif;
+            width: 100vw;
+            height: 100vw;
+            width: 100dvw;
+            height: 100dvh;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        #ui-text {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            color: white;
+            text-shadow: 1px 1px 3px black;
+            z-index: 20;
+            pointer-events: none;
+            font-size: 13px;
+        }
+
+        #joystick-zone {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40vw;
+            height: 50vh;
+            z-index: 20;
+            touch-action: none;
+        }
+
+        #joystick-base {
+            position: absolute;
+            bottom: 25px;
+            left: 25px;
+            width: 90px;
+            height: 90px;
+            background: rgba(0, 0, 0, 0.25);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        #joystick-stick {
+            position: absolute;
+            top: 22px;
+            left: 22px;
+            width: 42px;
+            height: 42px;
+            background: rgba(255, 255, 255, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            transform: translate(0px, 0px);
+        }
+
+        #sprintBtn {
+            position: absolute;
+            bottom: 130px;
+            left: 40px;
+            width: 55px;
+            height: 55px;
+            background: rgba(46, 213, 115, 0.7);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            border-radius: 50%;
+            outline: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 25;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            touch-action: none;
+        }
+        #sprintBtn.active {
+            background: rgba(235, 59, 90, 0.9);
+            transform: scale(0.92);
+        }
+
+        #spawnVehicleBtn {
+            position: absolute;
+            bottom: 195px;
+            left: 42px;
+            width: 50px;
+            height: 50px;
+            background: rgba(243, 156, 18, 0.85);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            border-radius: 50%;
+            outline: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 25;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            touch-action: none;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        /* Menu chọn xe */
+        #vehicleMenuOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(3px);
+            z-index: 100;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            touch-action: none;
+        }
+
+        #vehicleMenuBox {
+            background: rgba(30, 39, 46, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            width: 280px;
+            text-align: center;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+        }
+
+        #vehicleMenuBox h3 {
+            color: #fff;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .menu-option-btn {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            outline: none;
+        }
+
+        #optBike { background-color: #e67e22; }
+        #optLambo { background-color: #9b59b6; }
+        #optCancel { background-color: #7f8c8d; margin-top: 15px; }
+
+        #interactBikeBtn {
+            position: absolute;
+            bottom: 130px;
+            right: 45px;
+            width: 55px;
+            height: 55px;
+            background: rgba(52, 152, 219, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            border-radius: 50%;
+            outline: none;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 25;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            touch-action: none;
+            text-align: center;
+        }
+
+        #actionBtn {
+            position: absolute;
+            bottom: 35px;
+            right: 40px;
+            width: 75px;
+            height: 75px;
+            background: rgba(255, 165, 0, 0.7);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            color: white;
+            font-size: 13px;
+            font-weight: bold;
+            border-radius: 50%;
+            outline: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            touch-action: none;
+            text-align: center;
+        }
+        #actionBtn.active {
+            background: rgba(255, 69, 0, 1);
+            transform: scale(0.95);
+        }
+
+        #touch-look-zone {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 60vw;
+            height: 100vh;
+            z-index: 10;
+            touch-action: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="ui-text">
+        <h3 style="margin: 0 0 5px 0;">Yo</h3>
+        <p style="margin: 0;">Ưhat up</p>
+    </div>
+
+    <div id="joystick-zone">
+        <div id="joystick-base">
+            <div id="joystick-stick"></div>
+        </div>
+    </div>
+    
+    <button id="spawnVehicleBtn">TẠO<br>XE</button>
+    <button id="sprintBtn">CHẠY</button>
+    <button id="interactBikeBtn">LÁI XE</button>
+
+    <!-- Menu chọn xe Popup -->
+    <div id="vehicleMenuOverlay">
+        <div id="vehicleMenuBox">
+            <h3>BẠN MUỐN TẠO XE GÌ?</h3>
+            <button class="menu-option-btn" id="optBike">🏍️ Xe Máy Thường</button>
+            <button class="menu-option-btn" id="optLambo">🏎️ Lamborghini (Ngồi trong)</button>
+            <button class="menu-option-btn" id="optCancel">Hủy</button>
+        </div>
+    </div>
+
+    <button id="actionBtn">NHẢY</button>
+    <div id="touch-look-zone"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        let scene, camera, renderer, player;
+        let walkSpeed = 0.1;          
+        let sprintSpeed = 0.135;      
+        let sprintJumpSpeed = 0.180;   
+        
+        let isSprintPressed = false; 
+        let isActionPressed = false;    
+        let moveInput = { x: 0, y: 0 };
+        
+        let velocityY = 0;
+        let gravity = 0.015;
+        let jumpPower = 0.28;
+        let isGrounded = true;
+
+        let cameraAngleX = 0;   
+        let cameraAngleY = 0.6; 
+        
+        let cameraDistance = 6.0;
+        const maxCameraDistance = 25.0; 
+        const minCameraDistance = 2.0;
+
+        let activeLookTouchId = null;
+        let lastTouchX = 0;
+        let lastTouchY = 0;
+        let initialPinchDistance = null;
+        let initialZoomDist = 6.0;
+
+        let npcs = [];
+        let birds = [];     
+        let cliffColliders = []; 
+        let dustParticles = [];
+        const mapLimit = 88;
+
+        let currentVehicle = null; 
+        let vehicleType = null;    
+        let riderOnVehicle = null;
+        let isDriving = false;
+        
+        let vehicleSpeed = 0;
+        const baseBikeSpeed = 0.18;       
+        const maxBikeSpeed = 0.36;        
+        const baseLamboSpeed = 0.45;      
+        const maxLamboSpeed = 0.95;       
+
+        function lockLandscape() {
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('landscape').catch(() => {});
+            }
+        }
+
+        function init() {
+            lockLandscape();
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x73c2fb); 
+            scene.fog = new THREE.FogExp2(0x73c2fb, 0.012); 
+
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.1;
+            document.body.appendChild(renderer.domElement);
+
+            const ambientLight = new THREE.AmbientLight(0xdff9fb, 0.7);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0xfff6e5, 1.2);
+            dirLight.position.set(40, 70, 40);
+            dirLight.castShadow = true;
+            dirLight.shadow.mapSize.width = 2048;
+            dirLight.shadow.mapSize.height = 2048;
+            dirLight.shadow.camera.near = 0.5;
+            dirLight.shadow.camera.far = 200;
+            const d = 60;
+            dirLight.shadow.camera.left = -d;
+            dirLight.shadow.camera.right = d;
+            dirLight.shadow.camera.top = d;
+            dirLight.shadow.camera.bottom = -d;
+            dirLight.shadow.bias = -0.0005;
+            scene.add(dirLight);
+
+            const groundGeo = new THREE.PlaneGeometry(250, 250, 32, 32);
+            const groundMat = new THREE.MeshStandardMaterial({ 
+                color: 0x2ecc71, 
+                roughness: 0.85,
+                metalness: 0.05
+            });
+            const ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            scene.add(ground);
+
+            createSkyElements();
+            createBorderWalls();
+            createEnvironment();
+
+            player = createCharacter(0x3498db);
+            respawnPlayer();
+            scene.add(player);
+
+            createNPCs(100);
+
+            setupControls();
+            window.addEventListener('resize', onWindowResize);
+
+            animate();
+        }
+
+        function respawnPlayer() {
+            player.position.set((Math.random() - 0.5) * 50, 0, (Math.random() - 0.5) * 50);
+        }
+
+        function createSkyElements() {
+            const sunGeo = new THREE.SphereGeometry(10, 32, 32);
+            const sunMat = new THREE.MeshBasicMaterial({ color: 0xfffaa0 });
+            const sun = new THREE.Mesh(sunGeo, sunMat);
+            sun.position.set(90, 85, -100);
+            scene.add(sun);
+
+            const cloudMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, transparent: true, opacity: 0.88 });
+            for (let i = 0; i < 40; i++) {
+                const cloudGroup = new THREE.Group();
+                const blobCount = 4 + Math.floor(Math.random() * 4);
+                for (let j = 0; j < blobCount; j++) {
+                    const radius = 3 + Math.random() * 2.5;
+                    const blobGeo = new THREE.SphereGeometry(radius, 8, 8);
+                    const blob = new THREE.Mesh(blobGeo, cloudMat);
+                    blob.position.set((j - blobCount/2) * 3.2, Math.random() * 1.5, (Math.random() - 0.5) * 3);
+                    cloudGroup.add(blob);
+                }
+                cloudGroup.position.set(
+                    (Math.random() - 0.5) * 240,
+                    55 + Math.random() * 30,
+                    (Math.random() - 0.5) * 240
+                );
+                scene.add(cloudGroup);
+            }
+
+            for (let i = 0; i < 30; i++) {
+                const bird = createBirdMesh();
+                bird.position.set(
+                    (Math.random() - 0.5) * 200,
+                    35 + Math.random() * 25,
+                    (Math.random() - 0.5) * 200
+                );
+                bird.userData = { speed: 0.08 + Math.random() * 0.06, angle: Math.random() * Math.PI * 2 };
+                scene.add(bird);
+                birds.push(bird);
+            }
+        }
+
+        function createBirdMesh() {
+            const birdGroup = new THREE.Group();
+            const birdMat = new THREE.MeshStandardMaterial({ color: 0x2c3e50, roughness: 0.5 });
+            const bodyGeo = new THREE.BoxGeometry(0.7, 0.15, 0.25);
+            const body = new THREE.Mesh(bodyGeo, birdMat);
+            birdGroup.add(body);
+            return birdGroup;
+        }
+
+        function createCharacter(shirtColor) {
+            const group = new THREE.Group();
+            
+            const bodyGeo = new THREE.BoxGeometry(0.7, 0.9, 0.4);
+            const bodyMat = new THREE.MeshStandardMaterial({ color: shirtColor, roughness: 0.4, metalness: 0.1 });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.position.y = 1.05; 
+            body.castShadow = true;
+            body.receiveShadow = true;
+            group.add(body);
+
+            const headGeo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+            const headMat = new THREE.MeshStandardMaterial({ color: 0xffdcab, roughness: 0.6 });
+            const head = new THREE.Mesh(headGeo, headMat);
+            head.position.set(0, 1.75, 0);
+            head.castShadow = true;
+            group.add(head);
+
+            const limbMat = new THREE.MeshStandardMaterial({ color: 0x34495e, roughness: 0.5 });
+
+            const leftArmPivot = new THREE.Group();
+            leftArmPivot.position.set(-0.45, 1.4, 0);
+            const leftArmGeo = new THREE.BoxGeometry(0.2, 0.7, 0.2);
+            const leftArm = new THREE.Mesh(leftArmGeo, limbMat);
+            leftArm.position.y = -0.35;
+            leftArm.castShadow = true;
+            leftArmPivot.add(leftArm);
+            group.add(leftArmPivot);
+
+            const rightArmPivot = new THREE.Group();
+            rightArmPivot.position.set(0.45, 1.4, 0);
+            const rightArmGeo = new THREE.BoxGeometry(0.2, 0.7, 0.2);
+            const rightArm = new THREE.Mesh(rightArmGeo, limbMat);
+            rightArm.position.y = -0.35;
+            rightArm.castShadow = true;
+            rightArmPivot.add(rightArm);
+            group.add(rightArmPivot);
+
+            const leftLegPivot = new THREE.Group();
+            leftLegPivot.position.set(-0.2, 0.7, 0);
+            const leftLegGeo = new THREE.BoxGeometry(0.22, 0.7, 0.22);
+            const leftLeg = new THREE.Mesh(leftLegGeo, limbMat);
+            leftLeg.position.y = -0.35;
+            leftLeg.castShadow = true;
+            leftLegPivot.add(leftLeg);
+            group.add(leftLegPivot);
+
+            const rightLegPivot = new THREE.Group();
+            rightLegPivot.position.set(0.2, 0.7, 0);
+            const rightLegGeo = new THREE.BoxGeometry(0.22, 0.7, 0.22);
+            const rightLeg = new THREE.Mesh(rightLegGeo, limbMat);
+            rightLeg.position.y = -0.35;
+            rightLeg.castShadow = true;
+            rightLegPivot.add(rightLeg);
+            group.add(rightLegPivot);
+
+            group.userData = { leftArmPivot, rightArmPivot, leftLegPivot, rightLegPivot, walkTimer: Math.random() * 100 };
+            return group;
+        }
+
+        function createMotorcycleMesh() {
+            const bikeGroup = new THREE.Group();
+
+            const bodyMat = new THREE.MeshStandardMaterial({ color: 0xe67e22, roughness: 0.3, metalness: 0.6 }); 
+            const darkMat = new THREE.MeshStandardMaterial({ color: 0x2d3436, roughness: 0.7, metalness: 0.2 });
+            const chromeMat = new THREE.MeshStandardMaterial({ color: 0xdfe4ea, roughness: 0.1, metalness: 0.9 });
+            const lightMat = new THREE.MeshBasicMaterial({ color: 0xf1c40f }); 
+
+            const frameGeo = new THREE.BoxGeometry(0.65, 0.55, 1.8);
+            const frame = new THREE.Mesh(frameGeo, bodyMat);
+            frame.position.set(0, 0.55, 0);
+            frame.castShadow = true;
+            bikeGroup.add(frame);
+
+            const headGeo = new THREE.BoxGeometry(0.6, 0.5, 0.6);
+            const frontHead = new THREE.Mesh(headGeo, bodyMat);
+            frontHead.position.set(0, 0.85, 0.75);
+            frontHead.castShadow = true;
+            bikeGroup.add(frontHead);
+
+            const headlight = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.2, 0.1), lightMat);
+            headlight.position.set(0, 0.85, 1.06);
+            bikeGroup.add(headlight);
+
+            const seatGeo = new THREE.BoxGeometry(0.55, 0.18, 0.95);
+            const seat = new THREE.Mesh(seatGeo, darkMat);
+            seat.position.set(0, 0.88, -0.1);
+            seat.castShadow = true;
+            bikeGroup.add(seat);
+
+            const footrestGeo = new THREE.BoxGeometry(0.9, 0.1, 0.3);
+            const footrest = new THREE.Mesh(footrestGeo, chromeMat);
+            footrest.position.set(0, 0.25, -0.1);
+            footrest.castShadow = true;
+            bikeGroup.add(footrest);
+
+            const handleGeo = new THREE.BoxGeometry(1.2, 0.15, 0.2);
+            const handle = new THREE.Mesh(handleGeo, chromeMat);
+            handle.position.set(0, 1.25, 0.7);
+            handle.castShadow = true;
+            bikeGroup.add(handle);
+
+            const wheelGeo = new THREE.CylinderGeometry(0.42, 0.42, 0.28, 16);
+            wheelGeo.rotateZ(Math.PI / 2);
+
+            const frontWheel = new THREE.Mesh(wheelGeo, darkMat);
+            frontWheel.position.set(0, 0.42, 0.95);
+            frontWheel.castShadow = true;
+            bikeGroup.add(frontWheel);
+
+            const rearWheel = new THREE.Mesh(wheelGeo, darkMat);
+            rearWheel.position.set(0, 0.42, -0.95);
+            rearWheel.castShadow = true;
+            bikeGroup.add(rearWheel);
+
+            return bikeGroup;
+        }
+
+        function createLamborghiniMesh() {
+            const lamboGroup = new THREE.Group();
+
+            const bodyMat = new THREE.MeshStandardMaterial({ color: 0x9b59b6, roughness: 0.15, metalness: 0.8 }); 
+            const roofMat = new THREE.MeshStandardMaterial({ color: 0x8e44ad, roughness: 0.2, metalness: 0.7 }); 
+            const glassMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.05, metalness: 0.95, transparent: true, opacity: 0.5 });
+            const interiorMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
+            const seatMat = new THREE.MeshStandardMaterial({ color: 0xe74c3c, roughness: 0.6 }); 
+            const rimMat = new THREE.MeshStandardMaterial({ color: 0xf1c40f, roughness: 0.2, metalness: 0.9 }); 
+            const lightMat = new THREE.MeshBasicMaterial({ color: 0x00ffff }); 
+
+            // Thân xe thấp và mượt chuẩn siêu xe
+            const lowerBody = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.4, 3.2), bodyMat);
+            lowerBody.position.set(0, 0.35, 0);
+            lowerBody.castShadow = true;
+            lamboGroup.add(lowerBody);
+
+            const hood = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.24, 1.1), bodyMat);
+            hood.position.set(0, 0.42, 1.35);
+            hood.rotation.x = -0.15;
+            hood.castShadow = true;
+            lamboGroup.add(hood);
+
+            // NỘI THẤT VÀ GHẾ LÁI (ĐƯỢC ĐẶT SÂU HƠN VÀ THẤP HẲN XUỐNG DƯỚI)
+            const cabinInterior = new THREE.Group();
+            cabinInterior.position.set(0, -0.05, 0); 
+
+            const floor = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.05, 1.5), interiorMat);
+            floor.position.set(0, 0.1, 0);
+            cabinInterior.add(floor);
+
+            const dashboard = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.35, 0.35), interiorMat);
+            dashboard.position.set(0, 0.32, 0.65);
+            cabinInterior.add(dashboard);
+
+            // Ghế lái đặt lệch trái
+            const driverSeat = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.55, 0.52), seatMat);
+            driverSeat.position.set(-0.32, 0.28, -0.05);
+            driverSeat.castShadow = true;
+            cabinInterior.add(driverSeat);
+
+            const steeringWheel = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.05, 12), interiorMat);
+            steeringWheel.rotation.x = Math.PI / 3;
+            steeringWheel.position.set(-0.32, 0.48, 0.52);
+            cabinInterior.add(steeringWheel);
+
+            lamboGroup.add(cabinInterior);
+
+            // Khung trần xe siêu xe
+            const solidRoof = new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.08, 1.5), roofMat);
+            solidRoof.position.set(0, 1.15, -0.05);
+            solidRoof.castShadow = true;
+            lamboGroup.add(solidRoof);
+
+            const roofGlass = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.52, 1.45), glassMat);
+            roofGlass.position.set(0, 0.85, -0.05);
+            roofGlass.castShadow = true;
+            lamboGroup.add(roofGlass);
+
+            const spoilerWing = new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.05, 0.35), bodyMat);
+            spoilerWing.position.set(0, 0.92, -1.45);
+            lamboGroup.add(spoilerWing);
+            
+            const spoilerLegL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.22, 0.15), bodyMat);
+            spoilerLegL.position.set(-0.52, 0.8, -1.45);
+            lamboGroup.add(spoilerLegL);
+            
+            const spoilerLegR = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.22, 0.15), bodyMat);
+            spoilerLegR.position.set(0.52, 0.8, -1.45);
+            lamboGroup.add(spoilerLegR);
+
+            const headlightL = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.07, 0.07), lightMat);
+            headlightL.position.set(-0.5, 0.38, 1.78);
+            lamboGroup.add(headlightL);
+
+            const headlightR = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.07, 0.07), lightMat);
+            headlightR.position.set(0.5, 0.38, 1.78);
+            lamboGroup.add(headlightR);
+
+            const wheelGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.28, 20);
+            wheelGeo.rotateZ(Math.PI / 2);
+
+            const rimGeo = new THREE.CylinderGeometry(0.2, 0.2, 0.3, 12);
+            rimGeo.rotateZ(Math.PI / 2);
+
+            const createWheelWithRim = (x, z) => {
+                const wheelGroup = new THREE.Group();
+                const tire = new THREE.Mesh(wheelGeo, interiorMat);
+                tire.castShadow = true;
+                const rim = new THREE.Mesh(rimGeo, rimMat);
+                wheelGroup.add(tire);
+                wheelGroup.add(rim);
+                wheelGroup.position.set(x, 0.35, z);
+                return wheelGroup;
+            };
+
+            lamboGroup.add(createWheelWithRim(-0.72, 1.05));  
+            lamboGroup.add(createWheelWithRim(0.72, 1.05));   
+            lamboGroup.add(createWheelWithRim(-0.72, -1.05)); 
+            lamboGroup.add(createWheelWithRim(0.72, -1.05));  
+
+            return lamboGroup;
+        }
+
+        function spawnVehicle(type) {
+            if (currentVehicle) {
+                scene.remove(currentVehicle);
+                currentVehicle = null;
+            }
+            if (isDriving) {
+                isDriving = false;
+                player.visible = true;
+                document.getElementById('interactBikeBtn').innerText = "LÁI XE";
+                document.getElementById('actionBtn').innerText = "NHẢY";
+            }
+
+            vehicleType = type;
+            if (type === 'bike') {
+                currentVehicle = createMotorcycleMesh();
+            } else if (type === 'lambo') {
+                currentVehicle = createLamborghiniMesh();
+            }
+            
+            const spawnDist = 4.5;
+            const forwardOffset = new THREE.Vector3(0, 0, -spawnDist).applyAxisAngle(new THREE.Vector3(0, 1, 0), cameraAngleX + Math.PI);
+            currentVehicle.position.copy(player.position).add(forwardOffset);
+            currentVehicle.position.y = 0;
+            currentVehicle.rotation.y = cameraAngleX;
+
+            scene.add(currentVehicle);
+        }
+
+        function createDustParticle(pos, isBoosting) {
+            const pGeo = new THREE.SphereGeometry(isBoosting ? (0.22 + Math.random() * 0.15) : (0.18 + Math.random() * 0.12), 6, 6);
+            const pMat = new THREE.MeshBasicMaterial({ 
+                color: isBoosting ? (Math.random() > 0.3 ? 0xff4500 : 0xffa500) : 0xdcdde1, 
+                transparent: true, 
+                opacity: 0.85 
+            });
+            const p = new THREE.Mesh(pGeo, pMat);
+            
+            const backwardOffset = new THREE.Vector3(0, 0.2, vehicleType === 'lambo' ? 1.5 : 1.2).applyAxisAngle(new THREE.Vector3(0, 1, 0), currentVehicle.rotation.y);
+            p.position.copy(pos).add(backwardOffset);
+            p.position.x += (Math.random() - 0.5) * 0.5;
+            p.position.z += (Math.random() - 0.5) * 0.5;
+
+            scene.add(p);
+            dustParticles.push({ mesh: p, life: 1.0, isFire: isBoosting });
+        }
+
+        function updateDustParticles() {
+            for (let i = dustParticles.length - 1; i >= 0; i--) {
+                let dp = dustParticles[i];
+                dp.life -= 0.05;
+                dp.mesh.scale.addScalar(dp.isFire ? 0.05 : 0.03);
+                dp.mesh.material.opacity = dp.life * 0.8;
+                if (dp.life <= 0) {
+                    scene.remove(dp.mesh);
+                    dp.mesh.geometry.dispose();
+                    dp.mesh.material.dispose();
+                    dustParticles.splice(i, 1);
+                }
+            }
+        }
+
+        function createNPCs(count) {
+            const shirtColors = [0xe74c3c, 0x9b59b6, 0xf1c40f, 0xe67e22, 0x1abc9c, 0xe84393, 0x27ae60, 0x3498db, 0xe84393];
+            for (let i = 0; i < count; i++) {
+                const randomColor = shirtColors[Math.floor(Math.random() * shirtColors.length)];
+                const npc = createCharacter(randomColor);
+                npc.position.set((Math.random() - 0.5) * 160, 0, (Math.random() - 0.5) * 160);
+                
+                npc.userData.angle = Math.random() * Math.PI * 2;
+                npc.userData.changeDirTimer = 0;
+                npc.userData.velocityY = 0;
+                npc.userData.isGrounded = true;
+                npc.userData.jumpTimer = Math.random() * 200;
+
+                scene.add(npc);
+                npcs.push(npc);
+            }
+        }
+
+        function createBorderWalls() {
+            const wallMat = new THREE.MeshStandardMaterial({ color: 0x4b6584, roughness: 0.85 });
+            const wallHeight = 25;
+            const boundary = 88;
+            const step = 7.2;
+
+            for (let i = -boundary; i <= boundary; i += step) {
+                createCliffSegment(i, -boundary, wallMat, wallHeight);
+                createCliffSegment(i, boundary, wallMat, wallHeight);
+                createCliffSegment(-boundary, i, wallMat, wallHeight);
+                createCliffSegment(boundary, i, wallMat, wallHeight);
+            }
+        }
+
+        function createCliffSegment(x, z, mat, height) {
+            const h = height + (Math.random() - 0.5) * 4;
+            const geo = new THREE.BoxGeometry(8.5, h, 8.5);
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.set(x, h / 2, z);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            scene.add(mesh);
+            cliffColliders.push(mesh);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function createEnvironment() {
+            const rockMat = new THREE.MeshStandardMaterial({ color: 0x718093, roughness: 0.9, metalness: 0.1 });
+            for (let i = 0; i < 40; i++) {
+                const scale = 0.8 + Math.random() * 2.2;
+                const rockGeo = new THREE.DodecahedronGeometry(scale, 1);
+                const rock = new THREE.Mesh(rockGeo, rockMat);
+                rock.position.set((Math.random() - 0.5) * 160, scale * 0.5, (Math.random() - 0.5) * 160);
+                rock.castShadow = true;
+                rock.receiveShadow = true;
+                scene.add(rock);
+            }
+
+            for (let i = 0; i < 80; i++) {
+                const treeGroup = new THREE.Group();
+                const scaleFactor = 0.6 + Math.random() * 1.3; 
+                
+                const trunkHeight = 2.2 * scaleFactor;
+                const trunkRadius = 0.35 * scaleFactor;
+                const trunk = new THREE.Mesh(
+                    new THREE.CylinderGeometry(trunkRadius, trunkRadius * 1.2, trunkHeight, 8),
+                    new THREE.MeshStandardMaterial({ color: 0x8e44ad, roughness: 0.9 })
+                );
+                trunk.position.y = trunkHeight / 2;
+                trunk.castShadow = true;
+                treeGroup.add(trunk);
+
+                const leavesRadius = 1.6 * scaleFactor;
+                const leavesHeight = 3.2 * scaleFactor;
+                const leaves = new THREE.Mesh(
+                    new THREE.ConeGeometry(leavesRadius, leavesHeight, 7),
+                    new THREE.MeshStandardMaterial({ color: 0x27ae60, roughness: 0.6 })
+                );
+                leaves.position.y = trunkHeight + (leavesHeight / 2) - 0.2;
+                leaves.castShadow = true;
+                treeGroup.add(leaves);
+
+                treeGroup.position.set((Math.random() - 0.5) * 160, 0, (Math.random() - 0.5) * 160);
+                scene.add(treeGroup);
+            }
+        }
+
+        function checkJump() {
+            if (!isGrounded || isDriving) return; 
+            velocityY = jumpPower;
+            isGrounded = false;
+        }
+
+        function checkCliffCollision(newPos) {
+            const characterRadius = 0.4; 
+            for (let i = 0; i < cliffColliders.length; i++) {
+                const obj = cliffColliders[i];
+                const dx = Math.abs(newPos.x - obj.position.x);
+                const dz = Math.abs(newPos.z - obj.position.z);
+                if (dx < (4.25 + characterRadius) && dz < (4.25 + characterRadius)) return true; 
+            }
+            return false;
+        }
+
+        function setupControls() {
+            const spawnVehicleBtn = document.getElementById('spawnVehicleBtn');
+            const vehicleMenuOverlay = document.getElementById('vehicleMenuOverlay');
+            const optBike = document.getElementById('optBike');
+            const optLambo = document.getElementById('optLambo');
+            const optCancel = document.getElementById('optCancel');
+
+            const openMenu = (e) => {
+                e.preventDefault();
+                vehicleMenuOverlay.style.display = 'flex';
+            };
+            spawnVehicleBtn.addEventListener('touchstart', openMenu, {passive: false});
+            spawnVehicleBtn.addEventListener('click', openMenu);
+
+            optBike.addEventListener('click', () => {
+                spawnVehicle('bike');
+                vehicleMenuOverlay.style.display = 'none';
+            });
+            optBike.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                spawnVehicle('bike');
+                vehicleMenuOverlay.style.display = 'none';
+            }, {passive: false});
+
+            optLambo.addEventListener('click', () => {
+                spawnVehicle('lambo');
+                vehicleMenuOverlay.style.display = 'none';
+            });
+            optLambo.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                spawnVehicle('lambo');
+                vehicleMenuOverlay.style.display = 'none';
+            }, {passive: false});
+
+            const closeMenu = (e) => {
+                e.preventDefault();
+                vehicleMenuOverlay.style.display = 'none';
+            };
+            optCancel.addEventListener('click', closeMenu);
+            optCancel.addEventListener('touchstart', closeMenu, {passive: false});
+            vehicleMenuOverlay.addEventListener('click', (e) => {
+                if (e.target === vehicleMenuOverlay) vehicleMenuOverlay.style.display = 'none';
+            });
+
+            const interactBikeBtn = document.getElementById('interactBikeBtn');
+            const actionBtn = document.getElementById('actionBtn');
+
+            const toggleDrive = (e) => {
+                e.preventDefault();
+                if (!currentVehicle) return;
+                isDriving = !isDriving;
+                if (isDriving) {
+                    interactBikeBtn.innerText = "XUỐNG";
+                    player.visible = false; 
+                    
+                    riderOnVehicle = createCharacter(0x3498db);
+                    if (vehicleType === 'bike') {
+                        riderOnVehicle.position.set(0, 0.32, -0.05);
+                        riderOnVehicle.userData.leftLegPivot.rotation.x = -1.35;
+                        riderOnVehicle.userData.rightLegPivot.rotation.x = -1.35;
+                        riderOnVehicle.userData.leftArmPivot.rotation.x = -1.25;
+                        riderOnVehicle.userData.rightArmPivot.rotation.x = -1.25;
+                    } else {
+                        // TỌA ĐỘ CHUẨN XÁC: Nhân vật lọt thỏm hoàn toàn vào ghế lái xe Lamborghini
+                        riderOnVehicle.position.set(-0.32, 0.12, -0.05);
+                        riderOnVehicle.userData.leftLegPivot.rotation.x = -1.55;
+                        riderOnVehicle.userData.rightLegPivot.rotation.x = -1.55;
+                        riderOnVehicle.userData.leftArmPivot.rotation.x = -1.1;
+                        riderOnVehicle.userData.rightArmPivot.rotation.x = -1.1;
+                    }
+                    currentVehicle.add(riderOnVehicle);
+
+                    actionBtn.innerText = "TĂNG TỐC";
+                } else {
+                    interactBikeBtn.innerText = "LÁI XE";
+                    player.visible = true;
+                    
+                    if (riderOnVehicle) {
+                        currentVehicle.remove(riderOnVehicle);
+                        riderOnVehicle = null;
+                    }
+
+                    player.position.copy(currentVehicle.position).add(new THREE.Vector3(2.0, 0, 0));
+                    vehicleSpeed = 0;
+                    actionBtn.innerText = "NHẢY";
+                }
+            };
+            interactBikeBtn.addEventListener('touchstart', toggleDrive, {passive: false});
+            interactBikeBtn.addEventListener('click', toggleDrive);
+
+            const joystickZone = document.getElementById('joystick-zone');
+            const stick = document.getElementById('joystick-stick');
+            let joystickTouchId = null;
+            const maxRadius = 30;
+
+            joystickZone.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                lockLandscape();
+                if (joystickTouchId === null) {
+                    const touch = e.changedTouches[0];
+                    joystickTouchId = touch.identifier;
+                    updateJoystick(touch);
+                }
+            }, {passive: false});
+
+            joystickZone.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (joystickTouchId === null) return;
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    const touch = e.changedTouches[i];
+                    if (touch.identifier === joystickTouchId) { updateJoystick(touch); break; }
+                }
+            }, {passive: false});
+
+            const endJoystick = (e) => {
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    if (e.changedTouches[i].identifier === joystickTouchId) {
+                        joystickTouchId = null;
+                        moveInput = { x: 0, y: 0 };
+                        stick.style.transform = `translate(0px, 0px)`;
+                        break;
+                    }
+                }
+            };
+            joystickZone.addEventListener('touchend', endJoystick);
+            joystickZone.addEventListener('touchcancel', endJoystick);
+
+            function updateJoystick(touch) {
+                const centerX = 70; 
+                const centerY = window.innerHeight - 70;
+                let deltaX = touch.clientX - centerX;
+                let deltaY = touch.clientY - centerY;
+                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                if (distance > maxRadius) {
+                    deltaX = (deltaX / distance) * maxRadius;
+                    deltaY = (deltaY / distance) * maxRadius;
+                }
+                stick.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+                moveInput.x = deltaX / maxRadius;
+                moveInput.y = deltaY / maxRadius;
+                if (moveInput.x !== 0 || moveInput.y !== 0) {
+                    isSprintPressed = false;
+                    document.getElementById('sprintBtn').classList.remove('active');
+                }
+            }
+
+            const sprintBtn = document.getElementById('sprintBtn');
+            const toggleSprint = (e) => {
+                e.preventDefault();
+                isSprintPressed = !isSprintPressed;
+                if (isSprintPressed) sprintBtn.classList.add('active');
+                else sprintBtn.classList.remove('active');
+            };
+            sprintBtn.addEventListener('touchstart', toggleSprint, {passive: false});
+            sprintBtn.addEventListener('click', toggleSprint);
+
+            const startAction = (e) => {
+                e.preventDefault();
+                isActionPressed = true;
+                actionBtn.classList.add('active');
+                if (!isDriving) checkJump();
+            };
+            const endAction = (e) => { 
+                e.preventDefault(); 
+                isActionPressed = false; 
+                actionBtn.classList.remove('active'); 
+            };
+            actionBtn.addEventListener('touchstart', startAction, {passive: false});
+            actionBtn.addEventListener('touchend', endAction, {passive: false});
+            actionBtn.addEventListener('mousedown', (e) => { 
+                isActionPressed = true; 
+                actionBtn.classList.add('active'); 
+                if (!isDriving) checkJump();
+            });
+            window.addEventListener('mouseup', () => { 
+                isActionPressed = false; 
+                actionBtn.classList.remove('active'); 
+            });
+
+            const lookZone = document.getElementById('touch-look-zone');
+            
+            let isMouseDown = false;
+            let mouseLastX = 0;
+            let mouseLastY = 0;
+
+            lookZone.addEventListener('mousedown', (e) => {
+                isMouseDown = true;
+                mouseLastX = e.clientX;
+                mouseLastY = e.clientY;
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isMouseDown) return;
+                const deltaX = e.clientX - mouseLastX;
+                const deltaY = e.clientY - mouseLastY;
+                cameraAngleX -= deltaX * 0.008;
+                cameraAngleY += deltaY * 0.008;
+                cameraAngleY = Math.max(-0.8, Math.min(2.8, cameraAngleY));
+                mouseLastX = e.clientX;
+                mouseLastY = e.clientY;
+            });
+
+            window.addEventListener('mouseup', () => {
+                isMouseDown = false;
+            });
+
+            lookZone.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (e.targetTouches.length === 2) {
+                    initialPinchDistance = Math.hypot(
+                        e.targetTouches[0].clientX - e.targetTouches[1].clientX,
+                        e.targetTouches[0].clientY - e.targetTouches[1].clientY
+                    );
+                    initialZoomDist = cameraDistance;
+                    activeLookTouchId = null; 
+                } else if (e.targetTouches.length === 1 && activeLookTouchId === null) {
+                    const touch = e.targetTouches[0];
+                    activeLookTouchId = touch.identifier;
+                    lastTouchX = touch.clientX;
+                    lastTouchY = touch.clientY;
+                }
+            }, {passive: false});
+
+            lookZone.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (e.targetTouches.length === 2 && initialPinchDistance !== null) {
+                    const currentPinchDistance = Math.hypot(
+                        e.targetTouches[0].clientX - e.targetTouches[1].clientX,
+                        e.targetTouches[0].clientY - e.targetTouches[1].clientY
+                    );
+                    const pinchRatio = currentPinchDistance / initialPinchDistance;
+                    cameraDistance = initialZoomDist / pinchRatio;
+                    cameraDistance = Math.max(minCameraDistance, Math.min(maxCameraDistance, cameraDistance));
+                    return;
+                }
+                if (activeLookTouchId === null) return;
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    const touch = e.changedTouches[i];
+                    if (touch.identifier === activeLookTouchId) {
+                        const deltaX = touch.clientX - lastTouchX;
+                        const deltaY = touch.clientY - lastTouchY;
+                        cameraAngleX -= deltaX * 0.008;
+                        cameraAngleY += deltaY * 0.008;
+                        cameraAngleY = Math.max(-0.8, Math.min(2.8, cameraAngleY));
+                        lastTouchX = touch.clientX;
+                        lastTouchY = touch.clientY;
+                        break;
+                    }
+                }
+            }, {passive: false});
+
+            const endLook = (e) => {
+                if (e.targetTouches.length < 2) initialPinchDistance = null;
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    if (e.changedTouches[i].identifier === activeLookTouchId) {
+                        activeLookTouchId = null;
+                        break;
+                    }
+                }
+            };
+            lookZone.addEventListener('touchend', endLook);
+            lookZone.addEventListener('touchcancel', endLook);
+        }
+
+        function updateCharacterLimbs(pivots, isMovingState, isJumpingState) {
+            if (isJumpingState) {
+                pivots.leftArmPivot.rotation.x = THREE.MathUtils.lerp(pivots.leftArmPivot.rotation.x, -Math.PI / 1.2, 0.2);
+                pivots.rightArmPivot.rotation.x = THREE.MathUtils.lerp(pivots.rightArmPivot.rotation.x, -Math.PI / 1.2, 0.2);
+                pivots.leftLegPivot.rotation.x = THREE.MathUtils.lerp(pivots.leftLegPivot.rotation.x, -0.3, 0.2);
+                pivots.rightLegPivot.rotation.x = THREE.MathUtils.lerp(pivots.rightLegPivot.rotation.x, 0.3, 0.2);
+            } else if (isMovingState) {
+                pivots.walkTimer += 0.25;
+                let sinW = Math.sin(pivots.walkTimer);
+                pivots.leftArmPivot.rotation.x = sinW * 0.7;
+                pivots.rightArmPivot.rotation.x = -sinW * 0.7;
+                pivots.leftLegPivot.rotation.x = -sinW * 0.8;
+                pivots.rightLegPivot.rotation.x = sinW * 0.8;
+            } else {
+                pivots.leftArmPivot.rotation.x = THREE.MathUtils.lerp(pivots.leftArmPivot.rotation.x, 0, 0.15);
+                pivots.rightArmPivot.rotation.x = THREE.MathUtils.lerp(pivots.rightArmPivot.rotation.x, 0, 0.15);
+                pivots.leftLegPivot.rotation.x = THREE.MathUtils.lerp(pivots.leftLegPivot.rotation.x, 0, 0.15);
+                pivots.rightLegPivot.rotation.x = THREE.MathUtils.lerp(pivots.rightLegPivot.rotation.x, 0, 0.15);
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const interactBtn = document.getElementById('interactBikeBtn');
+            if (currentVehicle && !isDriving) {
+                const interactRange = 4.0;
+                const distToVehicle = player.position.distanceTo(currentVehicle.position);
+                if (distToVehicle < interactRange) {
+                    interactBtn.style.display = 'flex';
+                } else {
+                    interactBtn.style.display = 'none';
+                }
+            } else if (isDriving) {
+                interactBtn.style.display = 'flex';
+            } else {
+                interactBtn.style.display = 'none';
+            }
+
+            if (isDriving && currentVehicle) {
+                let isMovingVehicle = false;
+                let steerDir = 0;
+
+                if (moveInput.x !== 0 || moveInput.y !== 0) {
+                    steerDir = moveInput.x;
+                    let turnSpeed = 0.06;
+                    currentVehicle.rotation.y -= steerDir * turnSpeed; 
+                    isMovingVehicle = true;
+                }
+
+                let targetSpeed = 0;
+                let normalMaxSpd = (vehicleType === 'lambo') ? baseLamboSpeed : baseBikeSpeed;
+                let boostMaxSpd = (vehicleType === 'lambo') ? maxLamboSpeed : maxBikeSpeed;
+                
+                let currentAccelRate = normalMaxSpd / 120; 
+
+                if (isMovingVehicle || isSprintPressed) {
+                    targetSpeed = isActionPressed ? boostMaxSpd : normalMaxSpd;
+                    isMovingVehicle = true;
+                }
+
+                if (vehicleSpeed < targetSpeed) {
+                    vehicleSpeed = Math.min(targetSpeed, vehicleSpeed + currentAccelRate);
+                } else if (vehicleSpeed > targetSpeed) {
+                    vehicleSpeed = Math.max(targetSpeed, vehicleSpeed - 0.012); 
+                }
+
+                if (vehicleSpeed > 0.01) {
+                    const forward = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), currentVehicle.rotation.y);
+                    const deltaMove = forward.clone().multiplyScalar(vehicleSpeed);
+                    const nextPos = currentVehicle.position.clone().add(deltaMove);
+
+                    if (!checkCliffCollision(nextPos)) {
+                        currentVehicle.position.copy(nextPos);
+                        if (Math.random() < (isActionPressed ? 0.9 : 0.5)) {
+                            createDustParticle(currentVehicle.position, isActionPressed);
+                        }
+                    }
+                }
+                player.position.copy(currentVehicle.position);
+            } else {
+                const pivots = player.userData;
+                let isMoving = false;
+                let moveDir = new THREE.Vector3();
+
+                if (moveInput.x !== 0 || moveInput.y !== 0) {
+                    const camForward = new THREE.Vector3(Math.sin(cameraAngleX), 0, Math.cos(cameraAngleX));
+                    const camRight = new THREE.Vector3(Math.cos(cameraAngleX), 0, -Math.sin(cameraAngleX));
+
+                    moveDir.addScaledVector(camForward, -moveInput.y);
+                    moveDir.addScaledVector(camRight, -moveInput.x);
+                    moveDir.y = 0;
+                    moveDir.normalize();
+                    isMoving = true;
+                } else if (isSprintPressed) {
+                    moveDir.set(Math.sin(cameraAngleX), 0, Math.cos(cameraAngleX)).normalize();
+                    isMoving = true;
+                }
+
+                if (isMoving) {
+                    let currentSpeed = walkSpeed;
+                    if (isSprintPressed) {
+                        currentSpeed = isActionPressed ? sprintJumpSpeed : sprintSpeed;
+                    }
+                    const deltaMove = moveDir.clone().multiplyScalar(currentSpeed);
+                    const nextPos = player.position.clone().add(deltaMove);
+
+                    if (!checkCliffCollision(nextPos)) {
+                        player.position.copy(nextPos);
+                    }
+                    player.rotation.y = Math.atan2(moveDir.x, moveDir.z);
+                }
+
+                velocityY -= gravity;
+                player.position.y += velocityY;
+
+                if (player.position.y <= 0) {
+                    player.position.y = 0;
+                    velocityY = 0;
+                    isGrounded = true;
+                    if (isActionPressed) {
+                        checkJump();
+                    }
+                }
+
+                updateCharacterLimbs(pivots, isMoving, !isGrounded);
+            }
+
+            updateDustParticles();
+
+            birds.forEach(bird => {
+                const data = bird.userData;
+                bird.position.x += Math.sin(data.angle) * data.speed;
+                bird.position.z += Math.cos(data.angle) * data.speed;
+                if (Math.abs(bird.position.x) > 85 || Math.abs(bird.position.z) > 85) {
+                    data.angle += Math.PI + (Math.random() - 0.5);
+                }
+            });
+
+            npcs.forEach(npc => {
+                let data = npc.userData;
+                
+                data.changeDirTimer++;
+                if (data.changeDirTimer > 80 + Math.random() * 100) {
+                    data.angle += (Math.random() - 0.5) * 3.0;
+                    data.changeDirTimer = 0;
+                }
+
+                let npcDirX = Math.sin(data.angle);
+                let npcDirZ = Math.cos(data.angle);
+
+                let nextNpcX = npc.position.x + npcDirX * 0.11;
+                let nextNpcZ = npc.position.z + npcDirZ * 0.11;
+                const nextNpcPos = new THREE.Vector3(nextNpcX, npc.position.y, nextNpcZ);
+
+                data.jumpTimer++;
+                if (data.jumpTimer > 150 + Math.random() * 200 && data.isGrounded) {
+                    data.velocityY = jumpPower * 0.85;
+                    data.isGrounded = false;
+                    data.jumpTimer = 0;
+                }
+
+                data.velocityY -= gravity;
+                npc.position.y += data.velocityY;
+
+                if (npc.position.y <= 0) {
+                    npc.position.y = 0;
+                    data.velocityY = 0;
+                    data.isGrounded = true;
+                }
+
+                if (!checkCliffCollision(nextNpcPos) && Math.abs(nextNpcX) < mapLimit && Math.abs(nextNpcZ) < mapLimit) {
+                    npc.position.x = nextNpcX;
+                    npc.position.z = nextNpcZ;
+                    npc.rotation.y = data.angle;
+                    updateCharacterLimbs(data, true, !data.isGrounded);
+                } else {
+                    data.angle += 0.15;
+                    npc.rotation.y = data.angle;
+                    updateCharacterLimbs(data, false, !data.isGrounded);
+                }
+            });
+
+            const targetObj = isDriving && currentVehicle ? currentVehicle : player;
+            const targetLookY = targetObj.position.y + 1.0;
+            const dynamicDist = cameraDistance; 
+            
+            const camX = targetObj.position.x - dynamicDist * Math.sin(cameraAngleX) * Math.cos(cameraAngleY);
+            let camY = targetLookY + dynamicDist * Math.sin(cameraAngleY);
+            const camZ = targetObj.position.z - dynamicDist * Math.cos(cameraAngleX) * Math.cos(cameraAngleY);
+
+            if (camY < 0.1) camY = 0.1;
+
+            camera.position.set(camX, camY, camZ);
+            camera.lookAt(targetObj.position.x, targetLookY, targetObj.position.z);
+
+            renderer.render(scene, camera);
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
